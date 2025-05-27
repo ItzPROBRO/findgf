@@ -1,51 +1,132 @@
 <!DOCTYPE html>
 <html> 
-
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
   <title>findgf.com</title>
   <style>
-    body{
-      background-color: white;
-      transition: background-color 2s;
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
       margin: 0;
       height: 100vh;
+      background-color: black;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
-      font-family: sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+      position: relative;
+      transition: background-color 2s ease;
+    }
+
+    .door {
+      background-color: white;
+      width: 150px;
+      height: 300px;
+      position: absolute;
+      z-index: 0;
+      transform: scale(0.1);
+      transition: transform 10s ease-in-out, opacity 1s ease;
+      border-radius: 8px;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+      opacity: 1;
+    }
+
+    .door.grow {
+      transform: scale(1);
+    }
+
+    .door.zoomed {
+      transform: scale(10);
+      transition: transform 3s ease-in-out, opacity 1s ease 3s;
+    }
+
+    .door.hide {
+      opacity: 0;
+    }
+
+    .content {
+      text-align: center;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .centered-text {
-      font-size: 3rem;
-      text-align: center;
+      font-size: 3.5rem;
+      margin-bottom: 30px;
+      background: linear-gradient(45deg, #ff69b4, #ffd700);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 10px #ff69b4aa;
+      font-weight: bold;
+      animation: glow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #ff69b4aa; }
+      to   { text-shadow: 0 0 20px #ffd700cc; }
+    }
+
+    .loader-bar {
+      width: 300px;
+      height: 20px;
+      background-color: #444;
+      border-radius: 10px;
+      overflow: hidden;
       margin-bottom: 20px;
     }
 
-    .loader {
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid #333;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
+    .loader-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(to right, #ff69b4, #ffd700);
+      animation: fillBar 10s linear forwards;
     }
-    
-    @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+
+    @keyframes fillBar {
+      to { width: 100%; }
+    }
+
+    #start-button {
+      display: none;
+      padding: 12px 24px;
+      font-size: 1.3rem;
+      background: white;
+      color: black;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      margin-top: 20px;
+      user-select: none;
+      transition: background-color 0.3s;
+    }
+
+    #start-button:hover {
+      background-color: #f0f0f0;
+    }
   </style>
-  
 </head>
 
 <body>
-  <div class="centered-text">find gf here</div>
-  <div class="loader"></div>
-  
+  <div class="door" id="door"></div>
+
+  <div class="content" id="content">
+    <div class="centered-text">find gf here</div>
+    <div class="loader-bar"><div class="loader-fill" id="loaderFill"></div></div>
+    <button id="start-button">Start</button>
+  </div>
+
   <script>
+    const door = document.getElementById('door');
+    const loaderFill = document.getElementById('loaderFill');
+    const button = document.getElementById('start-button');
+
     function getRandomColor() {
       const letters = '0123456789ABCDEF';
       let color = '#';
@@ -54,13 +135,48 @@
       }
       return color;
     }
+
     window.addEventListener("load", () => {
+      // Start door zoom-in and loading bar fill simultaneously
+      door.classList.add('grow');
+
+      // After 10 seconds (loading done):
+      setTimeout(() => {
+        // Hide loader bar and fill
+        loaderFill.style.display = "none";
+        document.querySelector('.loader-bar').style.display = "none";
+
+        // Show start button
+        button.style.display = "block";
+      }, 10000);
+    });
+
+    button.addEventListener('click', () => {
+      button.style.display = 'none';
+
+      // Zoom door bigger over 3 seconds
+      door.classList.remove('grow');
+      door.classList.add('zoomed');
+
+      // After 3 seconds (door fully zoomed), fade door out
+      setTimeout(() => {
+        door.classList.add('hide');
+
+        // After fade duration (1s), hide door completely and start background animation
+        setTimeout(() => {
+          door.style.display = 'none';
+          startFullBackgroundAnimation();
+        }, 1000);
+      }, 3000);
+    });
+
+    function startFullBackgroundAnimation() {
+      // Change bg color every 2 seconds with smooth fade (body CSS has transition)
       setInterval(() => {
         const randomColor = getRandomColor();
         document.body.style.backgroundColor = randomColor;
-      }, 3000);
-    });
-  </script> 
+      }, 2000);
+    }
+  </script>
 </body>
-
 </html>
